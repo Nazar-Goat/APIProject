@@ -3,21 +3,23 @@ from uuid import uuid4
 from fastapi import HTTPException, status
 from loguru import logger
 
+from src.jwt_service import JWTService
 from src.modules.auth.repository import UserRepository
 from src.modules.auth.schemas import (
     UserRegisterSchema,
     UserRegisterOutSchema,
-    UserLoginSchema, CurrentUserSchema,
+    UserLoginSchema
 )
 
 from src.security import get_password_hash, verify_password
-from src.dependencies import jwt_service, credentials_exception, get_current_user
+from src.dependencies import credentials_exception
 
 
 
 class UserService:
-    def __init__(self, repo: UserRepository):
+    def __init__(self, repo: UserRepository, jwt_service: JWTService):
         self._repo = repo
+        self.__jwt_service = jwt_service
 
     async def register_user(self, register_user_data: UserRegisterSchema) -> UserRegisterOutSchema:
         user_exists = await self._repo.get_user_by_email(register_user_data.email)
@@ -57,10 +59,10 @@ class UserService:
             raise credentials_exception
 
         session_id = uuid4().hex
-        token = await jwt_service.create_session_token(
+        token = await self.__jwt_service.create_session_token(
             subject=session_id,
             data={
-                'id': user_exists.id,
+                'id': str(user_exists.id),
                 'email': user_exists.email,
                 'username': user_exists.username,
             },

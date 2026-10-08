@@ -16,7 +16,6 @@ def get_session_storage() -> SessionStorage:
 def get_jwt_service(session_storage: SessionStorage = Depends(get_session_storage)) -> JWTService:
     return JWTService(session_storage=session_storage)
 
-jwt_service: JWTService = get_jwt_service()
 
 
 credentials_exception = HTTPException(
@@ -25,6 +24,7 @@ credentials_exception = HTTPException(
 
 async def get_current_user(
     jw_token: str | None = Cookie(default=None, alias=settings.ACCESS_COOKIE_NAME),
+    jwt_service: JWTService = Depends(get_jwt_service),
 ) -> CurrentUserSchema:
     # logger.info("Try to get current user info") -> this log is too noisy,  this dependency is used in almost every endpoint
     if jw_token is None:

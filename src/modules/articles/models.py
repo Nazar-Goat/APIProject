@@ -10,9 +10,9 @@ from src.modules.auth.models import User
 
 Tag = Annotated[str, Field(min_length=1, max_length=30)]
 
-class Post(Document):
-    title: str = Field(min_length=1, max_length=200)
-    content: str = Field(min_length=1, max_length=10_000)
+class Article(Document):
+    title: str = Field(min_length=10, max_length=200)
+    content: str = Field(min_length=10, max_length=10_000)
     tags: list[Tag] = Field(default_factory=list, max_length=10)
     author: Link[User]
     created_at: datetime = Field(
@@ -20,7 +20,7 @@ class Post(Document):
     )
 
     class Settings:
-        name = "posts"
+        name = "articles"
         indexes = [
             [
                 ("title", pymongo.TEXT),

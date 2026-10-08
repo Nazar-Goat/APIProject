@@ -1,7 +1,7 @@
-from fastapi import APIRouter, Depends
-from fastapi.responses import JSONResponse
+from fastapi import APIRouter, Depends, Response
 from starlette import status
 
+from src.config import settings
 from src.modules.auth.schemas import (
     UserRegisterSchema,
     UserRegisterOutSchema,
@@ -11,7 +11,6 @@ from src.modules.auth.schemas import (
 from src.modules.auth.auth_dependencies import get_user_service as user_service
 from src.modules.auth.service import UserService
 from src.dependencies import AUS
-
 
 auth_router = APIRouter(prefix="/auth", tags=["auth"])
 
@@ -28,19 +27,25 @@ async def register(
     user_data = await service.register_user(register_data)
     return user_data
 
+
 @auth_router.post(
     "/login",
     status_code=status.HTTP_200_OK
 )
 async def login(
         login_data: UserLoginSchema,
+        response: Response,
         service: UserService = Depends(user_service),
 ):
     token = await service.login_user(login_data)
-    return JSONResponse(
-        status_code=status.HTTP_200_OK,
-        content={"access": token}
+
+    response.set_cookie(
+        key=settings.ACCESS_COOKIE_NAME,
+        value=token,
+        httponly=True,
     )
+    return {"access": token}
+
 
 @auth_router.get(
     "/profile",

@@ -8,7 +8,7 @@ from src.config import settings
 from src.router import api_router
 from src.database import connect_to_mongo, close_mongo_connection, get_database
 from src.modules.auth.models import User
-from src.modules.posts.models import Post
+from src.modules.articles.models import Article
 
 
 @asynccontextmanager
@@ -16,7 +16,7 @@ async def lifespan(app: FastAPI):
     await connect_to_mongo(settings.MONGO_URI, settings.MONGO_DB_NAME)
     await init_beanie(
         database=get_database(),
-        document_models=[User, Post],
+        document_models=[User, Article],
     )
     yield
     await close_mongo_connection()

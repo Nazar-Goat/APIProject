@@ -1,7 +1,7 @@
 from fastapi import APIRouter
 
 from src.modules.auth.router import auth_router
-from src.modules.posts.router import posts_router
+from src.modules.articles.router import posts_router
 
 
 api_router = APIRouter(prefix="/api/v1")
